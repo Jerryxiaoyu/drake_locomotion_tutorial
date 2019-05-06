@@ -1,0 +1,34 @@
+digraph _44276432 {
+rankdir=LR
+subgraph cluster44276432diagram {
+color=black
+concentrate=true
+label="44276432";
+subgraph cluster44276432inputports {
+rank=same
+color=lightgrey
+style=filled
+label="input ports"
+}
+subgraph cluster44276432outputports {
+rank=same
+color=lightgrey
+style=filled
+label="output ports"
+}
+subgraph cluster44276432subsystems {
+color=white
+label=""
+43267872 [shape=record, label="drake/geometry/SceneGraph@0000000002943720|{{<u0>Source_2_pose} | {<y0>lcm_visualization|<y1>query}}"];
+32928400 [shape=record, label="drake/multibody/MultibodyPlant@0000000001f67290|{{<u0>geometry_query|<u1>WorldModelInstance_actuation|<u2>DefaultModelInstance_actuation|<u3>ground_actuation|<u4>atlas_model_actuation|<u5>applied_generalized_force|<u6>applied_spatial_force} | {<y0>geometry_pose|<y1>continuous_state|<y2>atlas_model_continuous_state|<y3>atlas_model_generalized_contact_forces|<y4>contact_results}}"];
+43459232 [shape=record, label="drake/systems/rendering/PoseBundleToDrawMessage@00000000029722a0|{{<u0>u0} | {<y0>y0}}"];
+43480880 [shape=record, label="LcmPublisherSystem(DRAKE_VIEWER_DRAW)|{{<u0>lcm_message} | {}}"];
+44279504 [shape=record, label="drake/systems/SignalLogger@0000000002a3a6d0|{{<u0>data} | {}}"];
+43267872:y1 -> 32928400:u0;
+32928400:y0 -> 43267872:u0;
+43267872:y0 -> 43459232:u0;
+43459232:y0 -> 43480880:u0;
+32928400:y1 -> 44279504:u0;
+}
+}
+}
