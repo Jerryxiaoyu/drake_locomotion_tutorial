@@ -1,7 +1,4 @@
 import os, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(os.path.dirname(currentdir))
-os.sys.path.insert(0,parentdir)
 
 import numpy as np
 import time
@@ -9,9 +6,9 @@ import pydrake
 from pydrake.math import RigidTransform
 from pydrake.systems.analysis import Simulator
 
-from robot.RobotDiagram import LaikagoSimulationDiagram
-from robot.laikago_config import *
-from robot.utils import render_system_with_graphviz
+from systems.RobotDiagram import LaikagoSimulationDiagram
+from systems.laikago_config import *
+from systems.utils import render_system_with_graphviz
 
 
 is_graphviz = True
@@ -19,14 +16,15 @@ timestep = 0.001
 sim_duration = 10.0
 real_time_rate = 1
 
-system_diagram = LaikagoSimulationDiagram(timestep)
+system_diagram = LaikagoSimulationDiagram(timestep,
+                                          is_fixed=False, is_meshcat=True)
 
 mbp = system_diagram.get_mbp()
 diagram = system_diagram.get_diagram()
 
 # generate system diagram using graphviz if not in test mode
 if is_graphviz:
-    render_system_with_graphviz(diagram, "robot/view.gv")
+    render_system_with_graphviz(diagram, "systems/view.gv")
 
 diagram_context = diagram.CreateDefaultContext()
 mbp_context = diagram.GetMutableSubsystemContext(mbp, diagram_context)
@@ -54,5 +52,9 @@ if system_diagram.is_meshcat:
     time.sleep(5)
 print('Simulation is begining...')
 
+lcm = system_diagram.lcm
 # Run simulation
 simulator.StepTo(sim_duration)
+# lcm.StartReceiveThread()
+# simulator.StepTo(sim_duration)
+# lcm.StopReceiveThread()

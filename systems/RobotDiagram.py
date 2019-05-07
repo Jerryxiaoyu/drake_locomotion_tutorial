@@ -1,7 +1,4 @@
-# import os, inspect
-# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-# parentdir = os.path.dirname(os.path.dirname(currentdir))
-# os.sys.path.insert(0,parentdir)
+
 
 import os
 import numpy as np
@@ -10,11 +7,11 @@ import pydrake
 from pydrake.common import AddResourceSearchPath, FindResourceOrThrow
 from pydrake.multibody.tree import (UniformGravityFieldElement,
                                     WeldJoint, )
-from pydrake.multibody.plant import MultibodyPlant
+from pydrake.multibody.plant import MultibodyPlant, ConnectContactResultsToDrakeVisualizer
 from pydrake.multibody.parsing import Parser
 from pydrake.math import RigidTransform
 
-from pydrake.systems.meshcat_visualizer import MeshcatVisualizer
+from pydrake.systems.meshcat_visualizer import MeshcatVisualizer, MeshcatContactVisualizer
 from pydrake.geometry import SceneGraph
 from pydrake.systems.primitives import SignalLogger
 
@@ -29,17 +26,20 @@ from pydrake.attic.systems.controllers import RbtInverseDynamicsController
 from pydrake.attic.multibody.rigid_body_tree import RigidBodyTree, RigidBodyFrame, FloatingBaseType, \
     AddModelInstanceFromUrdfStringSearchingInRosPackages
 from pydrake.attic.multibody.parsers import PackageMap
+from pydrake.lcm import DrakeLcm
+from pydrake.geometry import DispatchLoadMessage
+
 from laikago_config import *
 from robot_state_encoder import RobotStateEncoder
 from pd_ff_controller import PDAndFeedForwardController
 
 class LaikagoSimulationDiagram(object):
-    def __init__(self, timestep ):
+    def __init__(self, timestep, is_fixed= False, is_meshcat = True):
 
         self.timestep = timestep
         self.logger_publish_period = 0.02
-        self.is_fixed = True
-        self.is_meshcat = True
+        self.is_fixed = is_fixed
+        self.is_meshcat = is_meshcat
         self.enable_id_controller = False # only for actuated robot, that means it works when is_fixed = True
         self.robot_initial_joint_angles = ROBOT_STANCE_CONFIGURATION
         self.laikago_initial_position_in_world_frame = np.array([0, 0, 0.47])
@@ -55,12 +55,20 @@ class LaikagoSimulationDiagram(object):
         # construct multibodyplant
         self.mbp = MultibodyPlant(self.timestep)
         self.scene_graph = SceneGraph()
+        self.lcm = DrakeLcm()
 
         self._Construct_env()
         self.builder, self.SystemList, self.LoggerList = self._CreateBuilder()
         self.diagram = self.builder.Build()
         if self.is_meshcat:
             self.MeshcatVisualizerSystem.load()
+
+        DispatchLoadMessage(self.scene_graph, self.lcm)
+
+
+        # some parameters
+        self.P_frame = self.get_robot_base_frame()
+        self.W_frame = self.get_world_frame()
 
     def _Construct_env(self):
         ### Create an environment
@@ -126,7 +134,7 @@ class LaikagoSimulationDiagram(object):
                             self.MeshcatVisualizerSystem.get_input_port(0))
             system_list.append(SceneGraphSystem)
         else:
-            ConnectDrakeVisualizer(builder, self.scene_graph)
+            ConnectDrakeVisualizer(builder, self.scene_graph, self.lcm)
 
         # Connect self.scene_graph to MBP for collision detection.
         builder.Connect(
@@ -136,6 +144,16 @@ class LaikagoSimulationDiagram(object):
             self.scene_graph.get_query_output_port(),
             self.mbp.get_geometry_query_input_port())
 
+        #ConnectContactResultsToDrakeVisualizer(builder, self.mbp, self.lcm)
+
+        RobotContactVizSystem = builder.AddSystem(MeshcatContactVisualizer(self.MeshcatVisualizerSystem,
+                                                                           force_threshold=1e-2,
+                                                                           contact_force_scale= 100,
+                                                                           plant = self.mbp))
+        builder.Connect(self.scene_graph.get_pose_bundle_output_port(),
+                        RobotContactVizSystem.get_input_port(0))
+        builder.Connect(self.mbp.get_output_port(4),
+                        RobotContactVizSystem.get_input_port(1))
 
         # Add system: Robot State Encoder
         RobotStateEncoderSystem = builder.AddSystem(
@@ -245,7 +263,7 @@ class LaikagoSimulationDiagram(object):
         pmap = PackageMap()
         pmap.PopulateFromFolder(MODEL_PATH_ROOT)
         laikago_frame = RigidBodyFrame("laikago_frame", rbt.world(),
-                                       [0, 0, 1.5], [0, 0, 0])
+                                       [0, 0, 0], [0, 0, 0])
         AddModelInstanceFromUrdfStringSearchingInRosPackages(
             open(laikago_urdf_path, 'r').read(),
             pmap,
@@ -255,3 +273,30 @@ class LaikagoSimulationDiagram(object):
             rbt)
 
         return rbt
+
+
+    def get_robot_base_frame(self):
+        return self.mbp.GetFrameByName('trunk', self.laikago_model)
+    def get_world_frame(self):
+        return self.mbp.world_body().body_frame()
+
+
+
+    def get_COM_in_worldframe(self, context):
+        '''
+        :param context:
+        :return: np.array([3,]) The center of mass of the robot is expressed in the world frame.
+        '''
+
+        q = needToknow
+        kineCache = self.laikago_rbt.doKinematics(q)
+
+
+        Bcom_P = RigidTransform().Identity()
+        Bcom_P.set_translation(self.laikago_rbt.centerOfMass(kineCache))
+
+        X_WP = self.mbp.CalcRelativeTransform(context, frame_A=self.W_frame, frame_B=self.get_robot_base_frame())
+
+        Bcom_transl_W = X_WP.multiply(Bcom_P).translation()
+
+        return Bcom_transl_W

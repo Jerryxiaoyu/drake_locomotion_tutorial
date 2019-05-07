@@ -1,0 +1,46 @@
+digraph _24085072 {
+rankdir=LR
+subgraph cluster24085072diagram {
+color=black
+concentrate=true
+label="24085072";
+subgraph cluster24085072inputports {
+rank=same
+color=lightgrey
+style=filled
+label="input ports"
+}
+subgraph cluster24085072outputports {
+rank=same
+color=lightgrey
+style=filled
+label="output ports"
+}
+subgraph cluster24085072subsystems {
+color=white
+label=""
+22973408 [shape=record, label="Multibody Plant|{{<u0>geometry_query|<u1>WorldModelInstance_actuation|<u2>DefaultModelInstance_actuation|<u3>laikago_actuation|<u4>ground_actuation|<u5>block_angle_steps_actuation|<u6>applied_generalized_force|<u7>applied_spatial_force} | {<y0>geometry_pose|<y1>continuous_state|<y2>laikago_continuous_state|<y3>laikago_generalized_contact_forces|<y4>contact_results}}"];
+16402864 [shape=record, label="Scene Graph|{{<u0>Source_2_pose} | {<y0>lcm_visualization|<y1>query}}"];
+27691376 [shape=record, label="meshcat_visualizer|{{<u0>lcm_visualization} | {}}"];
+26743424 [shape=record, label="meshcat_contact_visualizer|{{<u0>pose_bundle|<u1>contact_results} | {}}"];
+29948208 [shape=record, label="Robot State Encoder|{{<u0>joint_state_results_port} | {<y0>state_output_port}}"];
+26750304 [shape=record, label="Desired Trajectory System|{{} | {<y0>y0}}"];
+24039360 [shape=record, label="PD And Feedforward Controller|{{<u0>joint_state_results_port|<u1>joint_desired_state_port|<u2>feedforward_input_port} | {<y0>motor_command_output_port}}"];
+24045936 [shape=record, label="Zeros Value System|{{} | {<y0>y0}}"];
+24051232 [shape=record, label="Robot State Logger|{{<u0>data} | {}}"];
+24064656 [shape=record, label="Command Logger|{{<u0>data} | {}}"];
+22973408:y0 -> 16402864:u0;
+16402864:y1 -> 22973408:u0;
+24039360:y0 -> 22973408:u3;
+29948208:y0 -> 24039360:u0;
+26750304:y0 -> 24039360:u1;
+24045936:y0 -> 24039360:u2;
+22973408:y2 -> 24051232:u0;
+24039360:y0 -> 24064656:u0;
+16402864:y0 -> 26743424:u0;
+22973408:y4 -> 26743424:u1;
+16402864:y0 -> 27691376:u0;
+22973408:y2 -> 29948208:u0;
+}
+}
+}
