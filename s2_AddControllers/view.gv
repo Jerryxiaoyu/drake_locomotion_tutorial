@@ -1,86 +1,86 @@
-digraph _49510752 {
+digraph _55577600 {
 rankdir=LR
-subgraph cluster49510752diagram {
+subgraph cluster55577600diagram {
 color=black
 concentrate=true
-label="49510752";
-subgraph cluster49510752inputports {
+label="55577600";
+subgraph cluster55577600inputports {
 rank=same
 color=lightgrey
 style=filled
 label="input ports"
 }
-subgraph cluster49510752outputports {
+subgraph cluster55577600outputports {
 rank=same
 color=lightgrey
 style=filled
 label="output ports"
 }
-subgraph cluster49510752subsystems {
+subgraph cluster55577600subsystems {
 color=white
 label=""
-45161120 [shape=record, label="drake/geometry/SceneGraph@0000000002b11aa0|{{<u0>Source_2_pose} | {<y0>lcm_visualization|<y1>query}}"];
-45154944 [shape=record, label="drake/multibody/MultibodyPlant@0000000002b10280|{{<u0>geometry_query|<u1>WorldModelInstance_actuation|<u2>DefaultModelInstance_actuation|<u3>ground_actuation|<u4>laikago_actuation|<u5>block_angle_steps_actuation|<u6>applied_generalized_force|<u7>applied_spatial_force} | {<y0>geometry_pose|<y1>continuous_state|<y2>laikago_continuous_state|<y3>laikago_generalized_contact_forces|<y4>contact_results}}"];
-49144128 [shape=record, label="drake/systems/rendering/PoseBundleToDrawMessage@0000000002ede140|{{<u0>u0} | {<y0>y0}}"];
-49180096 [shape=record, label="LcmPublisherSystem(DRAKE_VIEWER_DRAW)|{{<u0>lcm_message} | {}}"];
-49284176 [shape=record, label="drake/systems/SignalLogger@0000000002f00450|{{<u0>data} | {}}"];
-49289696 [shape=record, label="robot_state_encoder|{{<u0>joint_state_results_port} | {<y0>state_output_port}}"];
-48087056 [shape=record, label="drake/pydrake/(anonymous)/Impl@0000000002ddc010|{{<u0>joint_state_results_port|<u1>joint_desired_state_port|<u2>feedforward_input_port} | {<y0>motor_command_output_port}}"];
-38401760 [shape=record, label="drake/systems/ConstantVectorSource@000000000249f6e0|{{} | {<y0>y0}}"];
-48096304 [shape=record, label="drake/systems/SignalLogger@0000000002dde430|{{<u0>data} | {}}"];
-subgraph cluster45230640diagram {
+43432480 [shape=record, label="drake/geometry/SceneGraph@000000000296ba20|{{<u0>Source_12_pose} | {<y0>lcm_visualization|<y1>query}}"];
+50430032 [shape=record, label="drake/multibody/MultibodyPlant@0000000003018050|{{<u0>geometry_query|<u1>WorldModelInstance_actuation|<u2>DefaultModelInstance_actuation|<u3>ground_actuation|<u4>laikago_actuation|<u5>block_angle_steps_actuation|<u6>applied_generalized_force|<u7>applied_spatial_force} | {<y0>geometry_pose|<y1>continuous_state|<y2>laikago_continuous_state|<y3>laikago_generalized_contact_forces|<y4>contact_results}}"];
+50408256 [shape=record, label="drake/systems/rendering/PoseBundleToDrawMessage@0000000003012b40|{{<u0>u0} | {<y0>y0}}"];
+50411904 [shape=record, label="LcmPublisherSystem(DRAKE_VIEWER_DRAW)|{{<u0>lcm_message} | {}}"];
+130056976 [shape=record, label="drake/systems/SignalLogger@0000000007c08310|{{<u0>data} | {}}"];
+130068736 [shape=record, label="robot_state_encoder|{{<u0>joint_state_results_port} | {<y0>state_output_port}}"];
+50179376 [shape=record, label="drake/pydrake/(anonymous)/Impl@0000000002fdad30|{{<u0>joint_state_results_port|<u1>joint_desired_state_port|<u2>feedforward_input_port} | {<y0>motor_command_output_port}}"];
+110196432 [shape=record, label="drake/systems/ConstantVectorSource@00000000069176d0|{{} | {<y0>y0}}"];
+55312944 [shape=record, label="drake/systems/SignalLogger@00000000034c0230|{{<u0>data} | {}}"];
+subgraph cluster110437616diagram {
 color=black
 concentrate=true
-label="drake/systems/controllers/rbt/InverseDynamicsController@0000000002b22a30";
-subgraph cluster45230640inputports {
+label="drake/systems/controllers/InverseDynamicsController@00000000069524f0";
+subgraph cluster110437616inputports {
 rank=same
 color=lightgrey
 style=filled
 label="input ports"
-_45230640_u0[color=blue, label="u0"];
-_45230640_u1[color=blue, label="u1"];
+_110437616_u0[color=blue, label="u0"];
+_110437616_u1[color=blue, label="u1"];
 }
-subgraph cluster45230640outputports {
+subgraph cluster110437616outputports {
 rank=same
 color=lightgrey
 style=filled
 label="output ports"
-_45230640_y0[color=green, label="y0"];
+_110437616_y0[color=green, label="y0"];
 }
-subgraph cluster45230640subsystems {
+subgraph cluster110437616subsystems {
 color=white
 label=""
-45233728 [shape=record, label="drake/systems/controllers/rbt/InverseDynamics@0000000002b23640|{{<u0>u0|<u1>u1} | {<y0>y0}}"];
-48242424 [shape=record, label="drake/systems/controllers/PidController@0000000002e01ef8 | { {<u0> x |<u1> x_d} |<y0> y}"];
-48243360 [shape=record, label="drake/systems/PassThrough@0000000002e022a0|{{<u0>u0} | {<y0>y0}}"];
-48120448 [shape=record, label="drake/systems/Adder@0000000002de4280|{{<u0>u0|<u1>u1} | {<y0>sum}}"];
-48126352 [shape=record, label="drake/systems/ConstantVectorSource@0000000002de5990|{{} | {<y0>y0}}"];
-48243360:y0 -> 45233728:u0;
-48120448:y0 -> 45233728:u1;
-48242424:y0 -> 48120448:u0;
-48126352:y0 -> 48120448:u1;
-48243360:y0 -> 48242424:u0;
-_45230640_u0 -> 48243360:u0 [color=blue];
-_45230640_u1 -> 48242424:u1 [color=blue];
-45233728:y0 -> _45230640_y0 [color=green];
+110440624 [shape=record, label="drake/systems/controllers/InverseDynamics@00000000069530b0|{{<u0>u0|<u1>u1} | {<y0>y0}}"];
+54481368 [shape=record, label="drake/systems/controllers/PidController@00000000033f51d8 | { {<u0> x |<u1> x_d} |<y0> y}"];
+129773520 [shape=record, label="drake/systems/PassThrough@0000000007bc2fd0|{{<u0>u0} | {<y0>y0}}"];
+129786464 [shape=record, label="drake/systems/Adder@0000000007bc6260|{{<u0>u0|<u1>u1} | {<y0>sum}}"];
+129792368 [shape=record, label="drake/systems/ConstantVectorSource@0000000007bc7970|{{} | {<y0>y0}}"];
+129773520:y0 -> 54481368:u0;
+129773520:y0 -> 110440624:u0;
+129786464:y0 -> 110440624:u1;
+54481368:y0 -> 129786464:u0;
+129792368:y0 -> 129786464:u1;
+_110437616_u0 -> 129773520:u0 [color=blue];
+_110437616_u1 -> 54481368:u1 [color=blue];
+110440624:y0 -> _110437616_y0 [color=green];
 }
 }
-49316256 [shape=record, label="drake/systems/ConstantVectorSource@0000000002f081a0|{{} | {<y0>y0}}"];
-49310880 [shape=record, label="drake/systems/SignalLogger@0000000002f06ca0|{{<u0>data} | {}}"];
-45161120:y1 -> 45154944:u0;
-48087056:y0 -> 45154944:u4;
-45154944:y0 -> 45161120:u0;
-49289696:y0 -> _45230640_u0;
-38401760:y0 -> _45230640_u1;
-49289696:y0 -> 48087056:u0;
-38401760:y0 -> 48087056:u1;
-49316256:y0 -> 48087056:u2;
-48087056:y0 -> 48096304:u0;
-45161120:y0 -> 49144128:u0;
-49144128:y0 -> 49180096:u0;
-45154944:y2 -> 49284176:u0;
-45154944:y2 -> 49289696:u0;
-_45230640_y0 -> 49310880:u0;
+108432672 [shape=record, label="drake/systems/ConstantVectorSource@0000000006768d20|{{} | {<y0>y0}}"];
+64525840 [shape=record, label="drake/systems/SignalLogger@0000000003d89610|{{<u0>data} | {}}"];
+50430032:y0 -> 43432480:u0;
+130068736:y0 -> 50179376:u0;
+110196432:y0 -> 50179376:u1;
+108432672:y0 -> 50179376:u2;
+43432480:y0 -> 50408256:u0;
+50408256:y0 -> 50411904:u0;
+43432480:y1 -> 50430032:u0;
+50179376:y0 -> 50430032:u4;
+50179376:y0 -> 55312944:u0;
+_110437616_y0 -> 64525840:u0;
+130068736:y0 -> _110437616_u0;
+110196432:y0 -> _110437616_u1;
+50430032:y2 -> 130056976:u0;
+50430032:y2 -> 130068736:u0;
 }
 }
 }

@@ -26,6 +26,8 @@ from pydrake.systems.controllers import InverseDynamicsController
 from pydrake.attic.systems.controllers import RbtInverseDynamicsController
 from pydrake.attic.multibody.rigid_body_tree import RigidBodyTree, RigidBodyFrame, FloatingBaseType, \
     AddModelInstanceFromUrdfStringSearchingInRosPackages
+from pydrake.attic.multibody.parsers import PackageMap
+
 
 motor_name = [
     "FL_hip_joint", "FR_hip_joint", "RR_hip_joint", "RL_hip_joint",
@@ -96,14 +98,14 @@ class RobotStateEncoder(LeafSystem):
         self.n = 0
 
         # Input Port
-        self.joint_state_results_port_index = self._DeclareInputPort('joint_state_results_port',
+        self.joint_state_results_port_index = self.DeclareInputPort('joint_state_results_port',
                                                                      PortDataType.kVectorValued,
                                                                      self.input_num).get_index()
         #         self.contact_results_port_index = self._DeclareAbstractInputPort('contact_results_port',
         #                                                                        AbstractValue.Make(ContactResults)).get_index()
         # Output Port
 
-        self.joint_state_outport_index = self._DeclareVectorOutputPort('state_output_port',
+        self.joint_state_outport_index = self.DeclareVectorOutputPort('state_output_port',
                                                                        BasicVector(self.output_num),
                                                                        self._OutputRobotState).get_index()
 
@@ -167,21 +169,21 @@ class PDAndFeedForwardController(LeafSystem):
         self.Kd = Kd
 
         # Input Port
-        self.joint_state_results_port_index = self._DeclareInputPort('joint_state_results_port',
+        self.joint_state_results_port_index = self.DeclareInputPort('joint_state_results_port',
                                                                      PortDataType.kVectorValued,
                                                                      self.input_num).get_index()
         #         self.contact_results_port_index = self._DeclareAbstractInputPort('contact_results_port',
         #                                                                        AbstractValue.Make(ContactResults)).get_index()
-        self.joint_desired_state_port_index = self._DeclareInputPort('joint_desired_state_port',
+        self.joint_desired_state_port_index = self.DeclareInputPort('joint_desired_state_port',
                                                                      PortDataType.kVectorValued,
                                                                      self.input_num).get_index()
 
-        self.feedforward_input_port_index = self._DeclareInputPort('feedforward_input_port',
+        self.feedforward_input_port_index = self.DeclareInputPort('feedforward_input_port',
                                                                    PortDataType.kVectorValued,
                                                                    self.feedforward_num).get_index()
         # Output Port
 
-        self.motor_command_outport_index = self._DeclareVectorOutputPort('motor_command_output_port',
+        self.motor_command_outport_index = self.DeclareVectorOutputPort('motor_command_output_port',
                                                                          BasicVector(self.output_num),
                                                                          self._OutputControlCommand).get_index()
 
@@ -346,7 +348,7 @@ builder.Connect(mbp.get_output_port(2),
 
 rbt = RigidBodyTree()
 
-from pydrake.multibody.parsers import PackageMap
+
 
 pmap = PackageMap()
 pmap.PopulateFromFolder(MODEL_PATH_ROOT)
