@@ -6,7 +6,7 @@ import numpy as np
 import pydrake
 from pydrake.common import AddResourceSearchPath, FindResourceOrThrow
 from pydrake.multibody.tree import (UniformGravityFieldElement,
-                                    WeldJoint, )
+                                    WeldJoint, FixedOffsetFrame )
 from pydrake.multibody.plant import MultibodyPlant, ConnectContactResultsToDrakeVisualizer
 from pydrake.multibody.parsing import Parser
 from pydrake.math import RigidTransform
@@ -30,8 +30,11 @@ from pydrake.lcm import DrakeLcm
 from pydrake.geometry import DispatchLoadMessage
 
 from laikago_config import *
-from robot_state_encoder import RobotStateEncoder
+from robot_state_encoder import RobotStateEncoder, RobotStateEncoderLCM, JacoStateEncoder
 from pd_ff_controller import PDAndFeedForwardController
+from controllers.claculator import Claculator
+
+
 
 class LaikagoSimulationDiagram(object):
     def __init__(self, timestep, is_fixed= False, is_meshcat = True):
@@ -81,6 +84,9 @@ class LaikagoSimulationDiagram(object):
         self.cinder_block_wide = mbp_parser.AddModelFromFile(file_name=cinder_block_wide_sdf_path,
                                                              model_name='block_angle_steps')
 
+        self.jaco2_model = mbp_parser.AddModelFromFile(file_name=kinova_model_urdf_path,
+                                                             model_name='jaco2')
+
         # mount the plane to the ground
         X_Wground = RigidTransform().Identity()
         X_Wground.set_translation(np.array([0, 0, 0.]))
@@ -105,6 +111,21 @@ class LaikagoSimulationDiagram(object):
                            parent_frame_P=self.mbp.world_body().body_frame(),
                            child_frame_C=self.mbp.GetBodyByName("trunk", self.laikago_model).body_frame(),
                            X_PC=X_Wrobot))
+
+        # mount the kinova to the ground
+        X_PF = RigidTransform().Identity()
+        X_PF.set_translation(np.array([-0.15, 0.02, 0.1875/2.0 +0.01675]))
+        X_PF_frame = FixedOffsetFrame('Jaco_P', P = self.mbp.GetBodyByName("trunk", self.laikago_model).body_frame(),
+                                X_PF = X_PF )
+        X_PF_frame = self.mbp.AddFrame(X_PF_frame)
+
+        X_Wjaco = RigidTransform().Identity()
+        X_Wjaco.set_translation(np.array([0, 0, 0]))
+        self.mbp.AddJoint(WeldJoint(name='weld_ground_to_world',
+                                    parent_frame_P= X_PF_frame,
+                                    child_frame_C=self.mbp.GetBodyByName("base",
+                                                                         self.jaco2_model).body_frame(),
+                                    X_PC=X_Wjaco))
 
         # Add gravity
         self.mbp.AddForceElement(UniformGravityFieldElement([0, 0, -9.81]))
@@ -146,14 +167,14 @@ class LaikagoSimulationDiagram(object):
 
         #ConnectContactResultsToDrakeVisualizer(builder, self.mbp, self.lcm)
 
-        RobotContactVizSystem = builder.AddSystem(MeshcatContactVisualizer(self.MeshcatVisualizerSystem,
-                                                                           force_threshold=1e-2,
-                                                                           contact_force_scale= 100,
-                                                                           plant = self.mbp))
-        builder.Connect(self.scene_graph.get_pose_bundle_output_port(),
-                        RobotContactVizSystem.get_input_port(0))
-        builder.Connect(self.mbp.get_output_port(4),
-                        RobotContactVizSystem.get_input_port(1))
+        # RobotContactVizSystem = builder.AddSystem(MeshcatContactVisualizer(self.MeshcatVisualizerSystem,
+        #                                                                    force_threshold=1e-2,
+        #                                                                    contact_force_scale= 100,
+        #                                                                    plant = self.mbp))
+        # builder.Connect(self.scene_graph.get_pose_bundle_output_port(),
+        #                 RobotContactVizSystem.get_input_port(0))
+        # builder.Connect(self.mbp.get_output_port(4),
+        #                 RobotContactVizSystem.get_input_port(1))
 
         # Add system: Robot State Encoder
         RobotStateEncoderSystem = builder.AddSystem(
@@ -162,9 +183,6 @@ class LaikagoSimulationDiagram(object):
         system_list.append(RobotStateEncoderSystem)
         builder.Connect(self.mbp.get_output_port(2),
                         RobotStateEncoderSystem.joint_state_results_input_port())
-
-
-
 
 
         # torque_vec = np.zeros(24)
@@ -220,6 +238,98 @@ class LaikagoSimulationDiagram(object):
             system_list.append(ZerosSystem)
             builder.Connect(ZerosSystem.get_output_port(0),
                             PDAndFeedForwardControllerSystem.feedforward_input_port())
+
+        # Add custom clacutaor system
+        ClaculatorSystem = builder.AddSystem(Claculator(self))
+        ClaculatorSystem.set_name('Claculator System')
+        system_list.append(ClaculatorSystem)
+        builder.Connect(RobotStateEncoderSystem.joint_state_outport_port(),
+                        ClaculatorSystem.joint_state_results_input_port())
+
+        from pydrake.systems.lcm import LcmPublisherSystem, LcmSubscriberSystem
+        from lcmt.robot_state_t import robot_state_t
+
+
+        ## This part is used for LCM control
+        # # Add system: Robot State Encoder LCM system
+        # RobotStateEncoderLCMSystem = builder.AddSystem(
+        #     RobotStateEncoderLCM(self.mbp, self.laikago_model, is_fixed=self.is_fixed))  # force_sensor_info
+        # RobotStateEncoderSystem.set_name('Robot State Encoder LCM')
+        # system_list.append(RobotStateEncoderLCMSystem)
+        # builder.Connect(self.mbp.get_output_port(2),
+        #                 RobotStateEncoderLCMSystem.joint_state_results_input_port())
+        #
+        # # Add states LCM publisher
+        # publish_period = 0.1
+        # RobotStatePublisherSystem = builder.AddSystem(LcmPublisherSystem.Make(channel='ROBOT_STATES',
+        #                                                                       lcm_type= robot_state_t,
+        #                                                                      lcm = self.lcm,
+        #                                                                      publish_period = publish_period))
+        # RobotStatePublisherSystem.set_name('Robot State Publisher System')
+        # system_list.append(RobotStatePublisherSystem)
+        # builder.Connect(RobotStateEncoderLCMSystem.lcm_message_port(),
+        #                 RobotStatePublisherSystem.get_input_port(0))
+        #
+        # from systems.robot_state_decoder import RobotStateDecoderLCM
+        # RobotStateDecoderLCMSystem = builder.AddSystem(
+        #     RobotStateDecoderLCM(self.mbp, self.laikago_model, is_fixed=self.is_fixed))  # force_sensor_info
+        # RobotStateDecoderLCMSystem.set_name('Robot State Decoder LCM')
+        # system_list.append(RobotStateDecoderLCMSystem)
+        #
+        # # Add states LCM publisher LcmSubscriberSystem
+        # RobotStateLcmSubscriberSystem = builder.AddSystem(LcmSubscriberSystem.Make(channel='ROBOT_STATES',
+        #                                                                       lcm_type=robot_state_t,
+        #                                                                       lcm=self.lcm))
+        # RobotStateLcmSubscriberSystem.set_name('Robot State Subscriber System')
+        # system_list.append(RobotStateLcmSubscriberSystem)
+        # builder.Connect(RobotStateLcmSubscriberSystem.get_output_port(0),
+        #                 RobotStateDecoderLCMSystem.states_lcm_message_port())
+        #
+        #
+        #
+        # RobotStateLCMLog = builder.AddSystem(SignalLogger(RobotStateDecoderLCMSystem.joint_state_results_port().size()))
+        # RobotStateLCMLog.set_name('Robot State LCM Logger')
+        # RobotStateLCMLog.DeclarePeriodicPublish(self.logger_publish_period)
+        # builder.Connect(RobotStateDecoderLCMSystem.joint_state_results_port(),
+        #                 RobotStateLCMLog.get_input_port(0))
+        # logger_system_list.append(RobotStateLCMLog)
+
+
+        # Add system: Robot State Encoder
+        JacoStateEncoderSystem = builder.AddSystem(
+            JacoStateEncoder(self.mbp, self.jaco2_model, is_fixed=True))  # force_sensor_info
+        JacoStateEncoderSystem.set_name('Jaco State Encoder')
+        system_list.append(JacoStateEncoderSystem)
+        builder.Connect(self.mbp.get_output_port(3),
+                        JacoStateEncoderSystem.joint_state_results_input_port())
+
+        JacoControllerSystem = builder.AddSystem(ConstantVectorSource(np.zeros(9)))
+        JacoControllerSystem.set_name('Jaco Controller System')
+
+        kp_id = np.ones(9)*10.0
+        ki_id = np.ones(9)*0.0
+        kd_id = np.ones(9)*5
+        jaco_rbt = self.Get_JacoRigidBodyTree()
+        Jaco_IDController = RbtInverseDynamicsController(jaco_rbt,
+                                                 kp_id, ki_id, kd_id,
+                                                 has_reference_acceleration=False)
+        Jaco_IDControllerSystem = builder.AddSystem(Jaco_IDController)
+        Jaco_IDControllerSystem.set_name('Jaco Inverse Dynamics Controller')
+        system_list.append(Jaco_IDControllerSystem)
+
+        builder.Connect(JacoStateEncoderSystem.joint_state_outport_port(),
+                        Jaco_IDControllerSystem.get_input_port(0))
+
+        desired_angle = np.array([0,-1.47, -2.5,1.0,-1.2,0,0,0,0])
+        desired_state = np.concatenate((desired_angle, np.zeros(9)))
+        traj_src = builder.AddSystem(ConstantVectorSource(desired_state))
+        builder.Connect(traj_src.get_output_port(0),
+                        Jaco_IDControllerSystem.get_input_port(1))
+
+        builder.Connect(Jaco_IDControllerSystem.get_output_port(0),
+                        self.mbp.get_input_port(6))
+
+
         ##########################################################################################
         ##----------------------Add Logger System to the plant---------------------------------##
 
@@ -273,14 +383,31 @@ class LaikagoSimulationDiagram(object):
             rbt)
 
         return rbt
+    def Get_JacoRigidBodyTree(self):
+        '''
+        get a rigidbodytree that describes the laikago without any instance.
+        :return: rigidbodytree of laiakgo
+        '''
+        rbt = RigidBodyTree()
+        pmap = PackageMap()
+        pmap.PopulateFromFolder(MODEL_PATH_ROOT)
+        laikago_frame = RigidBodyFrame("laikago_frame", rbt.world(),
+                                       [0, 0, 0], [0, 0, 0])
+        AddModelInstanceFromUrdfStringSearchingInRosPackages(
+            open(kinova_model_urdf_path, 'r').read(),
+            pmap,
+            os.path.join(MODEL_PATH_ROOT, 'jaco_description/urdf'),
+            FloatingBaseType.kFixed,
+            laikago_frame,
+            rbt)
+
+        return rbt
 
 
     def get_robot_base_frame(self):
         return self.mbp.GetFrameByName('trunk', self.laikago_model)
     def get_world_frame(self):
         return self.mbp.world_body().body_frame()
-
-
 
     def get_COM_in_worldframe(self, context):
         '''

@@ -17,7 +17,7 @@ sim_duration = 10.0
 real_time_rate = 1
 
 system_diagram = LaikagoSimulationDiagram(timestep,
-                                          is_fixed=False, is_meshcat=True)
+                                          is_fixed=False, is_meshcat=False)
 
 mbp = system_diagram.get_mbp()
 diagram = system_diagram.get_diagram()
@@ -36,10 +36,18 @@ if not system_diagram.is_fixed:
     mbp.SetFreeBodyPose(mbp_context, mbp.GetBodyByName("trunk", system_diagram.laikago_model),
                         X_WRobot)
 
-# set initial posture of the robot.
+# set initial posture of the laikago.
 for i, joint_angle in enumerate(ROBOT_STANCE_CONFIGURATION):
     laikago_joint = mbp.GetJointByName(JointName_list[i])
     laikago_joint.set_angle(context=mbp_context, angle=joint_angle)
+
+Jaco_STANCE_CONFIGURATION = \
+    np.array([0,-1.47, -2.5,1.0,-1.2,0,0,0,0])
+# set initial posture of the Jaco.
+for i, joint_angle in enumerate(Jaco_STANCE_CONFIGURATION):
+    jaco_joint = mbp.GetJointByName(Jaco_JointName_list[i])
+    jaco_joint.set_angle(context=mbp_context, angle=joint_angle)
+
 
 # simulation
 simulator = Simulator(diagram, diagram_context)  #

@@ -1,46 +1,91 @@
-digraph _24085072 {
+digraph _50707888 {
 rankdir=LR
-subgraph cluster24085072diagram {
+subgraph cluster50707888diagram {
 color=black
 concentrate=true
-label="24085072";
-subgraph cluster24085072inputports {
+label="50707888";
+subgraph cluster50707888inputports {
 rank=same
 color=lightgrey
 style=filled
 label="input ports"
 }
-subgraph cluster24085072outputports {
+subgraph cluster50707888outputports {
 rank=same
 color=lightgrey
 style=filled
 label="output ports"
 }
-subgraph cluster24085072subsystems {
+subgraph cluster50707888subsystems {
 color=white
 label=""
-22973408 [shape=record, label="Multibody Plant|{{<u0>geometry_query|<u1>WorldModelInstance_actuation|<u2>DefaultModelInstance_actuation|<u3>laikago_actuation|<u4>ground_actuation|<u5>block_angle_steps_actuation|<u6>applied_generalized_force|<u7>applied_spatial_force} | {<y0>geometry_pose|<y1>continuous_state|<y2>laikago_continuous_state|<y3>laikago_generalized_contact_forces|<y4>contact_results}}"];
-16402864 [shape=record, label="Scene Graph|{{<u0>Source_2_pose} | {<y0>lcm_visualization|<y1>query}}"];
-27691376 [shape=record, label="meshcat_visualizer|{{<u0>lcm_visualization} | {}}"];
-26743424 [shape=record, label="meshcat_contact_visualizer|{{<u0>pose_bundle|<u1>contact_results} | {}}"];
-29948208 [shape=record, label="Robot State Encoder|{{<u0>joint_state_results_port} | {<y0>state_output_port}}"];
-26750304 [shape=record, label="Desired Trajectory System|{{} | {<y0>y0}}"];
-24039360 [shape=record, label="PD And Feedforward Controller|{{<u0>joint_state_results_port|<u1>joint_desired_state_port|<u2>feedforward_input_port} | {<y0>motor_command_output_port}}"];
-24045936 [shape=record, label="Zeros Value System|{{} | {<y0>y0}}"];
-24051232 [shape=record, label="Robot State Logger|{{<u0>data} | {}}"];
-24064656 [shape=record, label="Command Logger|{{<u0>data} | {}}"];
-22973408:y0 -> 16402864:u0;
-16402864:y1 -> 22973408:u0;
-24039360:y0 -> 22973408:u3;
-29948208:y0 -> 24039360:u0;
-26750304:y0 -> 24039360:u1;
-24045936:y0 -> 24039360:u2;
-22973408:y2 -> 24051232:u0;
-24039360:y0 -> 24064656:u0;
-16402864:y0 -> 26743424:u0;
-22973408:y4 -> 26743424:u1;
-16402864:y0 -> 27691376:u0;
-22973408:y2 -> 29948208:u0;
+43918496 [shape=record, label="Multibody Plant|{{<u0>geometry_query|<u1>WorldModelInstance_actuation|<u2>DefaultModelInstance_actuation|<u3>laikago_actuation|<u4>ground_actuation|<u5>block_angle_steps_actuation|<u6>jaco2_actuation|<u7>applied_generalized_force|<u8>applied_spatial_force} | {<y0>geometry_pose|<y1>continuous_state|<y2>laikago_continuous_state|<y3>jaco2_continuous_state|<y4>laikago_generalized_contact_forces|<y5>jaco2_generalized_contact_forces|<y6>contact_results}}"];
+40866560 [shape=record, label="Scene Graph|{{<u0>Source_2_pose} | {<y0>lcm_visualization|<y1>query}}"];
+52297984 [shape=record, label="drake/systems/rendering/PoseBundleToDrawMessage@00000000031e0100|{{<u0>u0} | {<y0>y0}}"];
+52313424 [shape=record, label="LcmPublisherSystem(DRAKE_VIEWER_DRAW)|{{<u0>lcm_message} | {}}"];
+52327552 [shape=record, label="Robot State Encoder|{{<u0>joint_state_results_port} | {<y0>state_output_port}}"];
+52332288 [shape=record, label="Desired Trajectory System|{{} | {<y0>y0}}"];
+52322240 [shape=record, label="PD And Feedforward Controller|{{<u0>joint_state_results_port|<u1>joint_desired_state_port|<u2>feedforward_input_port} | {<y0>motor_command_output_port}}"];
+52341184 [shape=record, label="Zeros Value System|{{} | {<y0>y0}}"];
+52346480 [shape=record, label="Claculator System|{{<u0>joint_state_results_port} | {<y0>motor_command_output_port}}"];
+52357168 [shape=record, label="Jaco State Encoder|{{<u0>joint_state_results_port} | {<y0>state_output_port}}"];
+49279776 [shape=record, label="Jaco Controller System|{{} | {<y0>y0}}"];
+subgraph cluster50594864diagram {
+color=black
+concentrate=true
+label="Jaco Inverse Dynamics Controller";
+subgraph cluster50594864inputports {
+rank=same
+color=lightgrey
+style=filled
+label="input ports"
+_50594864_u0[color=blue, label="u0"];
+_50594864_u1[color=blue, label="u1"];
+}
+subgraph cluster50594864outputports {
+rank=same
+color=lightgrey
+style=filled
+label="output ports"
+_50594864_y0[color=green, label="y0"];
+}
+subgraph cluster50594864subsystems {
+color=white
+label=""
+50513456 [shape=record, label="drake/systems/controllers/rbt/InverseDynamics@000000000302c630|{{<u0>u0|<u1>u1} | {<y0>y0}}"];
+49321480 [shape=record, label="drake/systems/controllers/PidController@0000000002f09608 | { {<u0> x |<u1> x_d} |<y0> y}"];
+50099488 [shape=record, label="drake/systems/PassThrough@0000000002fc7520|{{<u0>u0} | {<y0>y0}}"];
+50111472 [shape=record, label="drake/systems/Adder@0000000002fca3f0|{{<u0>u0|<u1>u1} | {<y0>sum}}"];
+50117536 [shape=record, label="drake/systems/ConstantVectorSource@0000000002fcbba0|{{} | {<y0>y0}}"];
+50099488:y0 -> 49321480:u0;
+49321480:y0 -> 50111472:u0;
+50117536:y0 -> 50111472:u1;
+50099488:y0 -> 50513456:u0;
+50111472:y0 -> 50513456:u1;
+_50594864_u0 -> 50099488:u0 [color=blue];
+_50594864_u1 -> 49321480:u1 [color=blue];
+50513456:y0 -> _50594864_y0 [color=green];
+}
+}
+50134192 [shape=record, label="drake/systems/ConstantVectorSource@0000000002fcfcb0|{{} | {<y0>y0}}"];
+50140832 [shape=record, label="Robot State Logger|{{<u0>data} | {}}"];
+50144128 [shape=record, label="Command Logger|{{<u0>data} | {}}"];
+43918496:y0 -> 40866560:u0;
+40866560:y1 -> 43918496:u0;
+52322240:y0 -> 43918496:u3;
+_50594864_y0 -> 43918496:u6;
+43918496:y2 -> 50140832:u0;
+52322240:y0 -> 50144128:u0;
+52357168:y0 -> _50594864_u0;
+50134192:y0 -> _50594864_u1;
+40866560:y0 -> 52297984:u0;
+52297984:y0 -> 52313424:u0;
+52327552:y0 -> 52322240:u0;
+52332288:y0 -> 52322240:u1;
+52341184:y0 -> 52322240:u2;
+43918496:y2 -> 52327552:u0;
+52327552:y0 -> 52346480:u0;
+43918496:y3 -> 52357168:u0;
 }
 }
 }

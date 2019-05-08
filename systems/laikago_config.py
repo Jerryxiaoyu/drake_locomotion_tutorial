@@ -10,6 +10,8 @@ MODEL_PATH_ROOT = '/home/drl/PycharmProjects/underacuatedRoboics/model_world'
 cinder_block_wide_sdf_path = os.path.join(pydrake.getDrakePath(), "examples/atlas/sdf/cinder_block_wide/model.sdf")
 laikago_urdf_path = os.path.join(MODEL_PATH_ROOT, 'laikago_v1/laikago2.1.urdf')
 ground_urdf_path = os.path.join(MODEL_PATH_ROOT, 'world/plane.urdf')
+kinova_model_urdf_path = os.path.join(MODEL_PATH_ROOT, 'jaco_description/urdf/j2n6s300.urdf')
+
 
 JointName_list = [
     "FL_hip_joint", "FR_hip_joint", "RR_hip_joint", "RL_hip_joint",
@@ -29,6 +31,16 @@ MAX_TORQUE = 50
 ROBOT_STANCE_CONFIGURATION =  np.array([0, 0  , 0, 0, 0.62, 0.62, 0.62, 0.62, -1.06, -1.06, -1.06, -1.06])
 
 ROBOT_TRI_STANCE_CONFIGURATION = np.array([0, 0.26 , 0, 0, -0.2, 0.18, 0.62, 0.62, -0.85, -0.85, -0.85, -0.85])
+
+
+
+#Jaco_STANCE_CONFIGURATION =
+#
+Jaco_JointName_list = [
+    "j2n6s300_joint_1", "j2n6s300_joint_2", "j2n6s300_joint_3", "j2n6s300_joint_4",
+    "j2n6s300_joint_5", "j2n6s300_joint_6", "j2n6s300_joint_finger_1", "j2n6s300_joint_finger_2",
+    "j2n6s300_joint_finger_3"
+]
 
 ACTUATOR_CHOICE_MATRIX = np.array(
     [[1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],

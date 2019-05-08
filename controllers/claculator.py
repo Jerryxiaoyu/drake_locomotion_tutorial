@@ -5,7 +5,7 @@ import os
 
 from pydrake.systems.framework import LeafSystem, PortDataType, BasicVector, AbstractValue
 
-
+from pydrake.math import RigidTransform
 
 class Claculator(LeafSystem):
     """
@@ -14,9 +14,14 @@ class Claculator(LeafSystem):
 
     """
 
-    def __init__(self, rb_tree):
+    def __init__(self, system_diagram):
         LeafSystem.__init__(self)
-        self.rb_tree = rb_tree
+        self.system_diagram = system_diagram
+        self.mbp = self.system_diagram.mbp
+        self.rb_tree = self.system_diagram.Get_RigidBodyTree()
+
+        self.P_frame = self.system_diagram.get_robot_base_frame()
+        self.W_frame = self.system_diagram.get_world_frame()
 
         self.num_controlled_q = self.rb_tree.get_num_actuators()
 
@@ -55,6 +60,16 @@ class Claculator(LeafSystem):
         q = states[:self.num_controlled_q]
         v = states[self.num_controlled_q:]
 
+        kineCache = self.laikago_rbt.doKinematics(q)
+        Bcom_P = RigidTransform().Identity()
+        Bcom_P.set_translation(self.laikago_rbt.centerOfMass(kineCache))
+        X_WP = self.mbp.CalcRelativeTransform(context, frame_A=self.W_frame, frame_B=self.get_robot_base_frame())
+
+        Bcom_transl_W = X_WP.multiply(Bcom_P).translation()
+
+        if self.n % 100==0:
+            print('t = ',context.get_time(), " : ", Bcom_transl_W)
+        self.n +=1
 
         command = np.ones(12)
         output.SetFromVector(command)
